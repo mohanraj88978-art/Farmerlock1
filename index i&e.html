@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Income and Expenses</title>
+
+<style>
+    
+body{
+margin:0;
+font-family:Arial;
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+ background: url('e545228a8391f37dba1353eefb727f7c.jpg') no-repeat center center/cover;
+}
+
+.card{
+width:100%;
+max-width:400px;
+height:100vh;
+max-height:900px;
+padding:30px 25px;
+background: #0a0a0a;
+background:transparent;
+color:#ffffff;
+text-align:center;
+border-radius:0;
+box-shadow: 0 20px 40px rgba(0,0,0,0.8), inset 0 1px 1px rgba(255,255,255,0.05);
+overflow-y:auto;
+scrollbar-width: none;
+-ms-overflow-style: none;
+border-left: 1px solid rgba(255,255,255,0.03);
+border-right: 1px solid rgba(255,255,255,0.03);
+}
+
+h1{
+letter-spacing:3px;
+font-size:24px;
+}
+
+h2{
+font-size:18px;
+margin:10px 0;
+color:#ffd700;
+}
+
+.balance{
+font-size:40px;
+font-weight:300;
+margin:20px 0;
+color:#ffffff;
+background: transparent;
+padding:20px;
+border-radius:25px;
+border: 1px solid rgba(255,255,255,0.1);
+box-shadow: inset 0 4px 6px rgba(0,0,0,0.5), 0 10px 20px rgba(0,0,0,0.5);
+letter-spacing:1px;
+}
+
+input{
+padding:16px 18px;
+border:1px solid rgba(255,255,255,0.1);
+border-radius:18px;
+margin:6px 0;
+width:100%;
+text-align:left;
+font-size:15px;
+background: transparent;
+color:#ffffff;
+transition: all 0.3s;
+box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.left{
+margin-right:60px;
+}
+
+.right{
+margin-left:60px;
+}
+
+.full{
+width:100%;
+}
+
+button{
+width:100%;
+padding:16px;
+border:none;
+border-radius:18px;
+margin:8px 0;
+font-size:15px;
+font-weight:500;
+cursor:pointer;
+transition: all 0.3s;
+letter-spacing:0.5px;
+text-transform:uppercase;
+position:relative;
+overflow:hidden;
+color: #ffffff;
+}
+
+.income-btn{
+background: transparent;
+color: #d4af37;
+border: 1px solid #d4af37;
+box-shadow: 0 4px 15px rgba(212, 175, 55, 0.15);
+}
+
+.expense-btn{
+background: transparent;
+color: #ff6b6b;
+border: 1px solid #ff6b6b;
+box-shadow: 0 4px 15px rgba(255, 107, 107, 0.15);
+}
+
+.download-btn{
+background: transparent;
+color: #6b8cff;
+border: 1px solid #6b8cff;
+box-shadow: 0 4px 15px rgba(107, 140, 255, 0.15);
+}
+
+.delete-btn{
+background: transparent;
+color: #ff8c6b;
+border: 1px solid #ff8c6b;
+box-shadow: 0 4px 15px rgba(255, 140, 107, 0.15);
+}
+/* Custom scrollbar */
+.card {
+scrollbar-width: thin;
+scrollbar-color: #2a2a2a #0a0a0a;
+}
+
+.card::-webkit-scrollbar {
+width: 3px;
+display:block;
+}
+
+.card::-webkit-scrollbar-track {
+background: #0a0a0a;
+}
+
+.card::-webkit-scrollbar-thumb {
+background-color: #2a2a2a;
+border-radius: 20px;
+}                                                                         
+</style>
+
+</head>
+
+<body>
+
+<div class="card">
+
+<h1>INCOME & EXPENSES</h1>
+
+<div class="balance">
+₹ <span id="totalBalance">0</span>
+</div>
+
+<h2>Add Income</h2>
+
+<input class="full" type="text" id="incomeName" placeholder="Income Source">
+
+<input class="full" type="number" id="incomeAmount" placeholder="Amount">
+
+<button class="income-btn" onclick="addIncome()">Add Income</button>
+
+
+<h2>Add Expense</h2>
+
+<input class="full" type="text" id="expenseName" placeholder="Expense Item">
+
+<input class="full" type="number" id="expenseAmount" placeholder="Amount">
+
+<button class="expense-btn" onclick="addExpense()">Add Expense</button>
+
+
+<button class="download-btn" onclick="downloadExcel()">
+Download Excel
+</button>
+
+<button class="delete-btn" onclick="deleteAll()">
+Delete All Data
+</button>
+
+</div>
+
+<script>
+    // Load saved data
+let records = JSON.parse(localStorage.getItem("records")) || [];
+let totalBalance = Number(localStorage.getItem("balance")) || 0;
+
+
+// Save data
+function saveData() {
+localStorage.setItem("records", JSON.stringify(records));
+localStorage.setItem("balance", totalBalance);
+}
+
+
+// Update balance
+function updateBalance() {
+document.getElementById("totalBalance").innerText =
+totalBalance.toLocaleString("en-IN");
+saveData();
+}
+
+
+// Update entry count
+function updateEntryCount() {
+document.getElementById("entryCount").innerText = records.length;
+}
+
+
+// Update date, time, week
+function updateTime() {
+
+let now = new Date();
+
+document.getElementById("date").innerText =
+now.toLocaleDateString("en-GB");
+
+document.getElementById("time").innerText =
+now.toLocaleTimeString();
+
+let startOfYear = new Date(now.getFullYear(), 0, 1);
+let days = Math.floor((now - startOfYear) / (24 * 60 * 60 * 1000));
+let week = Math.ceil((days + startOfYear.getDay() + 1) / 7);
+
+document.getElementById("weekNumber").innerText = week;
+
+}
+
+setInterval(updateTime, 1000);
+
+
+// Add income
+function addIncome() {
+
+let name = document.getElementById("incomeName").value;
+let amount = Number(document.getElementById("incomeAmount").value);
+
+if (!name || !amount) {
+alert("Enter income details");
+return;
+}
+
+totalBalance += amount;
+
+records.push({
+type: "INCOME",
+name: name,
+amount: amount,
+date: new Date().toISOString()
+});
+
+updateBalance();
+updateEntryCount();
+
+document.getElementById("incomeName").value = "";
+document.getElementById("incomeAmount").value = "";
+
+}
+
+
+// Add expense
+function addExpense() {
+
+let name = document.getElementById("expenseName").value;
+let amount = Number(document.getElementById("expenseAmount").value);
+
+if (!name || !amount) {
+alert("Enter expense details");
+return;
+}
+
+if (amount > totalBalance) {
+alert("Not enough balance");
+return;
+}
+
+totalBalance -= amount;
+
+records.push({
+type: "EXPENSE",
+name: name,
+amount: amount,
+date: new Date().toISOString()
+});
+
+updateBalance();
+updateEntryCount();
+
+document.getElementById("expenseName").value = "";
+document.getElementById("expenseAmount").value = "";
+
+}
+
+
+// Download Excel
+function downloadExcel() {
+
+if (records.length === 0) {
+alert("No data to download");
+return;
+}
+
+let csv = "EXPENSE REPORT\n\n";
+csv += "Date,Time,Type,Description,Amount,Total\n";
+
+let runningTotal = 0;
+let totalIncome = 0;
+let totalExpense = 0;
+
+records.forEach(r => {
+
+let dateObj = new Date(r.date);
+
+let date = dateObj.toLocaleDateString("en-GB");
+let time = dateObj.toLocaleTimeString();
+
+if (r.type === "INCOME") {
+runningTotal += r.amount;
+totalIncome += r.amount;
+}
+else {
+runningTotal -= r.amount;
+totalExpense += r.amount;
+}
+
+csv += date + "," +
+time + "," +
+r.type + "," +
+r.name + "," +
+r.amount + "," +
+runningTotal + "\n";
+
+});
+
+csv += "\nSUMMARY\n";
+csv += "Total Income," + totalIncome + "\n";
+csv += "Total Expenses," + totalExpense + "\n";
+csv += "Final Total Balance," + runningTotal + "\n\n";
+
+csv += "Opening Balance,0\n";
+csv += "Net Change," + (totalIncome - totalExpense) + "\n";
+csv += "Total Transactions," + records.length + "\n";
+
+let blob = new Blob([csv], { type: "text/csv" });
+
+let a = document.createElement("a");
+a.href = URL.createObjectURL(blob);
+a.download = "income-expense-report.csv";
+a.click();
+
+}
+
+
+// Start new week
+function startNewWeek() {
+
+if (confirm("Start new week? Current entries will be cleared.")) {
+
+records = [];
+updateEntryCount();
+saveData();
+
+}
+
+}
+
+
+// Delete all data
+function deleteAll() {
+
+if (confirm("Delete all data?")) {
+
+records = [];
+totalBalance = 0;
+
+localStorage.clear();
+
+updateBalance();
+updateEntryCount();
+
+}
+
+}
+
+
+// Initial load
+updateBalance();
+updateEntryCount();
+updateTime();
+</script>
+
+</body>
+</html>
